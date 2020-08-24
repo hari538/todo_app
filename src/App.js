@@ -3,6 +3,7 @@ import Todo from './Todo.js';
 import { Button ,FormControl,Input,InputLabel} from '@material-ui/core';
 import './App.css';
 import  db from './firebase.js';
+import firebase from 'firebase';
 
 function App() {
   const [todos,setTodos]= useState([]);
@@ -12,16 +13,15 @@ function App() {
    useEffect(() => {
      db.collection('todos').onSnapshot(snapshot => {
      // console.log('firebase thing is workinng',snapshot.docs.map(doc => doc.data()));  <= this code is  for testing the actual firebase code below  
-       setTodos(snapshot.docs.map(doc => doc.data().task))
-     })
+       setTodos(snapshot.docs.map(doc => ({id:doc.id,todo : doc.data().task})))
 
-   },[]);
+   })},[]);
   const addTodo = (event)=>{
     console.log("working");
     event.preventDefault();// stops the refresh of the input area
     db.collection('todos').add({
       task:input,
-      timestamp: Date.now()
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     setTodos([...todos,input]);
     setInput(""); //cleans the input  every time
@@ -42,7 +42,7 @@ function App() {
       <ul>
         {todos.map(todo=> (
 
-          <Todo text={todo}/>
+          <Todo todo={todo}/>
           //<li>{todo}</li>
     
         ))}
